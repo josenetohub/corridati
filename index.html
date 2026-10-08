@@ -1,0 +1,2265 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corrida no Trânsito: Leis de Newton - Edição Fall Guys</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Luckiest+Guy&family=Outfit:wght@600;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --fg-purple: #2b0938;
+            --fg-dark-purple: #16031f;
+            --fg-pink: #ff007f;
+            --fg-cyan: #00f0ff;
+            --fg-yellow: #ffea00;
+            --fg-lime: #39ff14;
+            --fg-orange: #ff5500;
+            --fg-card-bg: rgba(35, 12, 54, 0.92);
+            --border-thick: 4px solid #000;
+            --shadow-chunky: 0 8px 0 #000;
+            --radius-bouncy: 24px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background: radial-gradient(circle at 50% 30%, #4a125e, var(--fg-dark-purple));
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* FALL GUYS FLOATING CANDY BG PATTERN */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-image: 
+                radial-gradient(circle, rgba(255, 0, 127, 0.15) 20%, transparent 20%),
+                radial-gradient(circle, rgba(0, 240, 255, 0.15) 20%, transparent 20%);
+            background-size: 80px 80px;
+            background-position: 0 0, 40px 40px;
+            z-index: -1;
+            pointer-events: none;
+            animation: bgFloat 20s linear infinite;
+        }
+
+        @keyframes bgFloat {
+            0% { background-position: 0 0, 40px 40px; }
+            100% { background-position: 80px 80px, 120px 120px; }
+        }
+
+        /* HEADER */
+        header {
+            background: rgba(22, 3, 31, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 4px solid #000;
+            padding: 12px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            font-size: 2.2rem;
+            filter: drop-shadow(0 4px 0 #000);
+            animation: bounceIcon 2s infinite ease-in-out;
+        }
+
+        @keyframes bounceIcon {
+            0%, 100% { transform: translateY(0) rotate(-5deg); }
+            50% { transform: translateY(-6px) rotate(5deg); }
+        }
+
+        .logo-title {
+            font-family: 'Luckiest Guy', cursive;
+            font-size: 1.9rem;
+            letter-spacing: 1px;
+            background: linear-gradient(180deg, #fff 20%, var(--fg-yellow) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            -webkit-text-stroke: 2px #000;
+            filter: drop-shadow(0 3px 0 #000);
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 16px;
+        }
+
+        .stat-badge {
+            background: var(--fg-pink);
+            border: 3px solid #000;
+            box-shadow: 0 4px 0 #000;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-family: 'Luckiest Guy', cursive;
+            font-size: 1.05rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        /* MAIN CONTAINER */
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            width: 100%;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        /* SETUP / MENU SCREEN */
+        #setup-screen {
+            width: 100%;
+            max-width: 650px;
+            background: var(--fg-card-bg);
+            border: var(--border-thick);
+            border-radius: var(--radius-bouncy);
+            padding: 36px;
+            box-shadow: var(--shadow-chunky), 0 0 30px rgba(255, 0, 127, 0.3);
+            text-align: center;
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        #setup-screen h1 {
+            font-family: 'Luckiest Guy', cursive;
+            font-size: 2.6rem;
+            color: var(--fg-yellow);
+            -webkit-text-stroke: 2px #000;
+            text-shadow: 0 4px 0 #000;
+            margin-bottom: 4px;
+        }
+
+        #setup-screen p.subtitle {
+            color: var(--fg-cyan);
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 24px;
+        }
+
+        .player-count-selector {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .count-btn {
+            background: #3b1154;
+            border: 3px solid #000;
+            box-shadow: 0 6px 0 #000;
+            color: white;
+            font-family: 'Luckiest Guy', cursive;
+            font-size: 1.2rem;
+            padding: 12px 28px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .count-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 0 #000;
+            background: #541778;
+        }
+
+        .count-btn.active {
+            background: var(--fg-pink);
+            border-color: #000;
+            color: white;
+            box-shadow: 0 6px 0 #000;
+            transform: translateY(2px);
+        }
+
+        .players-config-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .player-config-card {
+            background: rgba(0, 0, 0, 0.35);
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-radius: 18px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            text-align: left;
+        }
+
+        .player-number-badge {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 3px solid #000;
+            box-shadow: 0 3px 0 #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Luckiest Guy', cursive;
+            font-size: 1.3rem;
+            color: white;
+        }
+
+        .player-input-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .player-input-group label {
+            font-size: 0.85rem;
+            color: var(--fg-cyan);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .player-input-group input {
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid #000;
+            padding: 10px 14px;
+            border-radius: 12px;
+            color: white;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            outline: none;
+        }
+
+        .avatar-selector {
+            display: flex;
+            gap: 8px;
+        }
+
+        .avatar-opt {
+            font-size: 1.6rem;
+            padding: 8px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: transform 0.15s, background 0.15s;
+        }
+
+        .avatar-opt:hover, .avatar-opt.selected {
+            background: var(--fg-pink);
+            border-color: #000;
+            box-shadow: 0 4px 0 #000;
+            transform: scale(1.15) rotate(-3deg);
+        }
+
+        .start-btn {
+            width: 100%;
+            background: linear-gradient(180deg, var(--fg-lime) 0%, #1fb800 100%);
+            border: var(--border-thick);
+            box-shadow: var(--shadow-chunky);
+            color: #000;
+            font-family: 'Luckiest Guy', cursive;
+            font-size: 1.8rem;
+            padding: 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            letter-spacing: 1px;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 11px 0 #000;
+            filter: brightness(1.1);
+        }
+
+        .start-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 4px 0 #000;
+        }
+
+        /* MAIN GAME SCREEN */
+        #game-screen {
+            width: 100%;
+            display: none;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* PLAYERS DASHBOARD BAR */
+        .players-bar {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .player-hud-card {
+            background: var(--fg-card-bg);
+            border: 3px solid #000;
+            box-shadow: 0 6px 0 #000;
+            border-radius: 18px;
+            padding: 10px 18px;
+            min-width: 230px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+
+        .player-hud-card.active-turn {
+            border-color: var(--fg-cyan);
+            box-shadow: 0 8px 0 #000, 0 0 20px rgba(0, 240, 255, 0.6);
+            transform: scale(1.04) translateY(-4px);
+            background: rgba(45, 18, 70, 0.95);
+        }
+
+        .hud-avatar {
+            font-size: 2.2rem;
+            background: rgba(255, 255, 255, 0.15);
+            border: 3px solid #000;
+            border-radius: 50%;
+            width: 52px;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 0 #000;
+            position: relative;
+        }
+
+        .hud-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hud-name {
+            font-family: 'Luckiest Guy', cursive;
+            font-size: 1.15rem;
+            letter-spacing: 0.5px;
+            -webkit-text-stroke: 1px #000;
+        }
+
+        .hud-tile {
+            font-size: 0.9rem;
+            color: var(--fg-yellow);
+            font-weight: 700;
+        }
+
+        .hud-inventory {
+            margin-top: 4px;
+            display: flex;
+            gap: 4px;
+        }
+
+        .power-tag {
+            font-size: 0.75rem;
+            background: var(--fg-pink);
+            border: 1px solid #000;
+            padding: 2px 6px;
+            border-radius: 6px;
+            color: white;
+            font-weight: 800;
+        }
+
+        /* STATUS BADGE */
+        .status-tag {
+            position: absolute;
+            top: -12px;
+            right: 12px;
+            background: var(--fg-orange);
+            border: 2px solid #000;
+            color: white;
+            font-family: 'Luckiest Guy', cursive;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 12px;
+            box-shadow: 0 2px 0 #000;
+            animation: blinkBadge 1s infinite alternate;
+        }
+
+        @keyframes blinkBadge {
+            from { transform: scale(1); }
+            to { transform: scale(1.08); }
+        }
+
+        /* BOARD CONTAINER */
+        .board-wrapper {
+            position: relative;
+            width: 100%;
+            background: rgba(22, 3, 31, 0.95);
+            border: var(--border-thick);
+            border-radius: var(--radius-bouncy);
+            box-shadow: var(--shadow-chunky), 0 0 25px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        #board-canvas {
+            display: block;
+            border-radius: 16px;
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* CONTROLS PANEL */
+        .controls-panel {
+            background: var(--fg-card-bg);
+            border: var(--border-thick);
+            border-radius: var(--radius-bouncy);
+            box-shadow: var(--shadow-chunky);
+            padding: 16px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .turn-status-banner {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Luckiest Guy', cursive;
+            font-size: 1.4rem;
+            color: var(--fg-yellow);
+            -webkit-text-stroke: 1.5px #000;
+        }
+
+        .action-area {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        /* NEON PULSING POWER BUTTON */
+        .btn-use-power {
+            background: linear-gradient(180deg, #ff007f 0%, #b8005b 100%);
+            color: white;
+            border: 3px solid #000;
+            padding: 14px 22px;
+            border-radius: 18px;
+            font-family: 'Luckiest Guy', cursive;
+            font-size: 1.15rem;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            transition: all 0.15s ease;
+            animation: neonPulse 1.8s infinite ease-in-out;
+        }
+
+        @keyframes neonPulse {
+            0% {
+                box-shadow: 0 4px 0 #000, 0 0 8px #ff007f, 0 0 15px #ff007f;
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 6px 0 #000, 0 0 20px #ff007f, 0 0 35px #ff00ff, 0 0 50px #ff007f;
+                transform: scale(1.05);
+            }
+            100% {
+                box-shadow: 0 4px 0 #000, 0 0 8px #ff007f, 0 0 15px #ff007f;
+                transform: scale(1);
+            }
+        }
+
+        .btn-use-power:hover:not(:disabled) {
+            transform: translateY(-3px) scale(1.08);
+            filter: brightness(1.2);
+        }
+
+        .btn-use-power:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+            animation: none;
+            box-shadow: 0 4px 0 #000;
+        }
+
+        /* DICE CONTAINER & BUTTON */
+        .dice-container {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .dice-box {
+            width: 58px;
+            height: 58px;
+            background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%);
+            color: #000;
+            border: 3px solid #000;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            font-weight: 900;
+            font-family: 'Luckiest Guy', cursive;
+            box-shadow: 0 5px 0 #000;
+            transition: transform 0.1s ease;
+        }
+
+        .dice-box.rolling {
+            animation: diceShake 0.3s ease-in-out infinite;
+        }
+
+        @keyframes diceShake {
+            0% { transform: rotate(0deg) scale(1.1); }
+            25% { transform: rotate(-18deg) scale(1.2); }
+            50% { transform: rotate(18deg) scale(1.1); }
+            75% { transform: rotate(-12deg) scale(1.2); }
+            100% { transform: rotate(0deg) scale(1.1); }
+        }
+
+        .roll-btn {
+            background: linear-gradient(180deg, var(--fg-cyan) 0%, #00b0ff 100%);
+            border: var(--border-thick);
+            box-shadow: var(--shadow-chunky);
+            color: #000;
+            font-family: 'Luckiest Guy', cursive;
+            font-size: 1.4rem;
+            padding: 14px 28px;
+            border-radius: 18px;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            transition: all 0.15s ease;
+        }
+
+        .roll-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 0 #000;
+            filter: brightness(1.1);
+        }
+
+        .roll-btn:active:not(:disabled) {
+            transform: translateY(3px);
+            box-shadow: 0 3px 0 #000;
+        }
+
+        .roll-btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            box-shadow: 0 4px 0 #000;
+        }
+
+        /* FULLSCREEN TURN OVERLAY */
+        .turn-overlay-banner {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(15, 2, 22, 0.7);
+            backdrop-filter: blur(6px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            pointer-events: none;
+        }
+
+        .turn-overlay-banner.active {
+            display: flex;
+            animation: overlayFade 1.2s ease-in-out forwards;
+        }
+
+        @keyframes overlayFade {
+            0% { opacity: 0; }
+            20% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        .turn-banner-card {
+            background: linear-gradient(135deg, var(--fg-pink), var(--fg-purple));
+            border: 6px solid #000;
+            box-shadow: 0 12px 0 #000, 0 0 50px var(--fg-pink);
+            border-radius: 32px;
+            padding: 24px 48px;
+            text-align: center;
+            transform: scale(0.5);
+            animation: popTurnBanner 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes popTurnBanner {
+            0% { transform: scale(0.3) rotate(-8deg); opacity: 0; }
+            30% { transform: scale(1.1) rotate(3deg); opacity: 1; }
+            50% { transform: scale(1) rotate(0deg); opacity: 1; }
+            80% { transform: scale(1) rotate(0deg); opacity: 1; }
+            100% { transform: scale(0.8) rotate(5deg); opacity: 0; }
+        }
+
+        .turn-banner-text {
+            font-family: 'Luckiest Guy', cursive;
+            font-size: 3.2rem;
+            color: var(--fg-yellow);
+            -webkit-text-stroke: 3px #000;
+            text-shadow: 0 6px 0 #000;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            justify-content: center;
+        }
+
+        /* MODAL SYSTEM */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(15, 2, 22, 0.85);
+            backdrop-filter: blur(8px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes modalPop {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-card {
+            background: var(--fg-card-bg);
+            border: 5px solid #000;
+            border-radius: 30px;
+            width: 100%;
+            max-width: 600px;
+            padding: 32px;
+            box-shadow: 0 12px 0 #000, 0 0 35px rgba(255, 0, 127, 0.4);
+            text-align: center;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-badge {
+            display: inline-block;
+            padding: 6px 20px;
+            border-radius: 20px;
+            border: 2px solid #000;
+            font-family: 'Luckiest Guy', cursive;
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+            margin-bottom: 14px;
+            box-shadow: 0 3px 0 #000;
+        }
+
+        .modal-title {
+            font-family: 'Luckiest Guy', cursive;
+            font-size: 2.2rem;
+            color: var(--fg-yellow);
+            -webkit-text-stroke: 2px #000;
+            text-shadow: 0 4px 0 #000;
+            margin-bottom: 12px;
+        }
+
+        /* DIFFICULTY SELECTION */
+        .difficulty-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin: 20px 0;
+        }
+
+        .diff-btn {
+            background: rgba(0, 0, 0, 0.4);
+            border: 3px solid #000;
+            box-shadow: 0 5px 0 #000;
+            border-radius: 18px;
+            padding: 16px 10px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .diff-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 0 #000;
+        }
+
+        .diff-btn.facil { border-color: var(--fg-lime); }
+        .diff-btn.facil:hover { background: rgba(57, 255, 20, 0.25); }
+        .diff-btn.media { border-color: var(--fg-yellow); }
+        .diff-btn.media:hover { background: rgba(255, 234, 0, 0.25); }
+        .diff-btn.dificil { border-color: var(--fg-pink); }
+        .diff-btn.dificil:hover { background: rgba(255, 0, 127, 0.25); }
+
+        .diff-title {
+            font-family: 'Luckiest Guy', cursive;
+            font-size: 1.2rem;
+        }
+
+        .diff-reward {
+            font-size: 0.85rem;
+            color: var(--fg-cyan);
+            font-weight: 600;
+        }
+
+        /* QUESTION PROMPT */
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 16px 0 20px 0;
+            line-height: 1.4;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 18px;
+            border-radius: 18px;
+            border: 3px solid var(--fg-cyan);
+            text-align: left;
+            box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.4);
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .opt-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 3px solid #000;
+            box-shadow: 0 4px 0 #000;
+            padding: 14px 18px;
+            border-radius: 14px;
+            color: white;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .opt-btn:hover:not(:disabled) {
+            background: var(--fg-cyan);
+            color: #000;
+            transform: translateX(6px);
+        }
+
+        .opt-btn.correct {
+            background: var(--fg-lime) !important;
+            color: #000 !important;
+        }
+
+        .opt-btn.wrong {
+            background: var(--fg-pink) !important;
+            color: #fff !important;
+        }
+
+        .explanation-box {
+            background: rgba(0, 240, 255, 0.15);
+            border: 2px solid var(--fg-cyan);
+            border-radius: 14px;
+            padding: 14px;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+            text-align: left;
+            line-height: 1.4;
+            display: none;
+        }
+
+        .modal-action-btn {
+            background: linear-gradient(180deg, var(--fg-cyan) 0%, #00b0ff 100%);
+            border: 3px solid #000;
+            box-shadow: 0 5px 0 #000;
+            color: #000;
+            font-family: 'Luckiest Guy', cursive;
+            font-size: 1.3rem;
+            padding: 12px 36px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .modal-action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 0 #000;
+        }
+
+        /* EVENT CARD */
+        .event-card {
+            background: rgba(0, 0, 0, 0.4);
+            border: 4px dashed var(--fg-yellow);
+            border-radius: 20px;
+            padding: 24px;
+            margin: 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .event-icon {
+            font-size: 4rem;
+            filter: drop-shadow(0 4px 0 #000);
+        }
+
+        .event-desc {
+            font-size: 1.15rem;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        /* TARGET SELECTOR GRID */
+        .targets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 14px;
+            margin: 20px 0;
+        }
+
+        .target-card {
+            background: rgba(0, 0, 0, 0.4);
+            border: 3px solid #000;
+            box-shadow: 0 4px 0 #000;
+            border-radius: 16px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .target-card:hover, .target-card.selected {
+            background: var(--fg-pink);
+            transform: scale(1.08) rotate(-2deg);
+        }
+
+        /* VICTORY & PODIUM */
+        .podium-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 16px;
+            margin: 30px 0;
+            height: 190px;
+        }
+
+        .podium-place {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100px;
+        }
+
+        .podium-avatar {
+            font-size: 2.8rem;
+            margin-bottom: 6px;
+            filter: drop-shadow(0 4px 0 #000);
+        }
+
+        .podium-bar {
+            width: 100%;
+            border: 3px solid #000;
+            box-shadow: 0 5px 0 #000;
+            border-radius: 14px 14px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Luckiest Guy', cursive;
+            font-size: 1.8rem;
+            color: white;
+        }
+
+        .podium-1 .podium-bar { height: 130px; background: linear-gradient(to top, #d97706, #fbbf24); }
+        .podium-2 .podium-bar { height: 95px; background: linear-gradient(to top, #64748b, #cbd5e1); }
+        .podium-3 .podium-bar { height: 65px; background: linear-gradient(to top, #78350f, #d97706); }
+
+        #confetti-canvas {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 150;
+        }
+
+        @media (max-width: 768px) {
+            header { padding: 10px 16px; flex-direction: column; gap: 8px; }
+            .controls-panel { flex-direction: column; align-items: stretch; text-align: center; }
+            .action-area { justify-content: center; width: 100%; }
+            .difficulty-options { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- FULLSCREEN TURN ANNOUNCEMENT OVERLAY -->
+    <div class="turn-overlay-banner" id="turn-banner-overlay">
+        <div class="turn-banner-card">
+            <div class="turn-banner-text">
+                <span id="overlay-avatar">🚗</span>
+                <span id="overlay-player-name">VEZ DO JOGADOR 1</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- HEADER -->
+    <header>
+        <div class="logo-container">
+            <span class="logo-icon">👑</span>
+            <div class="logo-title">Corrida no Trânsito: Leis de Newton</div>
+        </div>
+        <div class="header-stats">
+            <div class="stat-badge">⏱️ <span id="game-timer">00:00</span></div>
+            <div class="stat-badge">🔄 Rodada <span id="turn-counter">1</span></div>
+        </div>
+    </header>
+
+    <!-- CONTAINER -->
+    <div class="container">
+
+        <!-- 1. SETUP / MENU SCREEN -->
+        <div id="setup-screen">
+            <h1>Configuração da Partida</h1>
+            <p class="subtitle">Escolha os jogadores e prepare seus veículos!</p>
+
+            <label style="font-family: 'Luckiest Guy', cursive; font-size: 1.2rem; color: var(--fg-yellow); margin-bottom: 8px; display: block;">Número de Jogadores:</label>
+            <div class="player-count-selector">
+                <button class="count-btn active" data-count="2">2 Jogadores</button>
+                <button class="count-btn" data-count="3">3 Jogadores</button>
+            </div>
+
+            <div class="players-config-list" id="players-config-list">
+                <!-- Dynamically injected player cards -->
+            </div>
+
+            <button class="start-btn" id="start-game-btn">🏁 Iniciar Corrida!</button>
+        </div>
+
+        <!-- 2. GAME SCREEN -->
+        <div id="game-screen">
+            <!-- PLAYERS HUD -->
+            <div class="players-bar" id="players-hud-bar">
+                <!-- Injected player cards -->
+            </div>
+
+            <!-- BOARD CONTAINER -->
+            <div class="board-wrapper">
+                <canvas id="board-canvas" width="1100" height="580"></canvas>
+            </div>
+
+            <!-- CONTROLS & DICE PANEL -->
+            <div class="controls-panel">
+                <div class="turn-status-banner" id="turn-status-banner">
+                    <span id="current-player-icon">🚗</span>
+                    <span id="current-player-text">Vez de Jogador 1</span>
+                </div>
+
+                <div class="action-area">
+                    <button class="btn-use-power" id="use-power-btn" disabled>
+                        <span>⚡ Usar Poder</span>
+                    </button>
+
+                    <div class="dice-container">
+                        <div class="dice-box" id="dice-display">🎲</div>
+                        <button class="roll-btn" id="roll-dice-btn">Rolar Dado (1-3)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODAL 1: PHYSICS QUESTION ❓ -->
+    <div class="modal-overlay" id="question-modal">
+        <div class="modal-card">
+            <span class="modal-badge" style="background: var(--fg-cyan); color: #000;">Desafio de TI! ❓</span>
+            <h2 class="modal-title" id="question-modal-title">Pergunta de Informática</h2>
+
+            <!-- STEP 1: Difficulty Select -->
+            <div id="difficulty-selection-step">
+                <p style="color: var(--fg-cyan); font-weight: 600; margin-bottom: 14px;">Escolha o nível de dificuldade da pergunta:</p>
+                <div class="difficulty-options">
+                    <button class="diff-btn facil" data-diff="facil">
+                        <span class="diff-title">🟢 Recruta do TI</span>
+                        <span class="diff-reward">Acerto: +1 casa<br>Erro: -1 casa</span>
+                    </button>
+                    <button class="diff-btn media" data-diff="media">
+                        <span class="diff-title">🟡 Técnico de Bancada</span>
+                        <span class="diff-reward">Acerto: +2 casas<br>Erro: -2 casas</span>
+                    </button>
+                    <button class="diff-btn dificil" data-diff="dificil">
+                        <span class="diff-title">🔴 Especialista de Servidores</span>
+                        <span class="diff-reward">Acerto: +3 casas<br>Erro: -3 casas</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 2: Question & Choices -->
+            <div id="question-active-step" style="display: none;">
+                <div class="question-text" id="question-prompt-text">
+                    Carregando pergunta...
+                </div>
+                <div class="options-list" id="question-options-container">
+                    <!-- Option buttons -->
+                </div>
+                <div class="explanation-box" id="question-explanation">
+                    <!-- Explanation text -->
+                </div>
+                <button class="modal-action-btn" id="question-continue-btn" style="display: none;">Continuar Turno</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: SORTE OU REVÉS 🎲 -->
+    <div class="modal-overlay" id="event-modal">
+        <div class="modal-card">
+            <span class="modal-badge" style="background: var(--fg-yellow); color: #000;">Sorte ou Revés! 🎲</span>
+            <h2 class="modal-title">Evento no Trânsito</h2>
+
+            <div class="event-card">
+                <div class="event-icon" id="event-icon-disp">🚨</div>
+                <h3 style="font-size: 1.4rem; font-family: 'Luckiest Guy', cursive; color: var(--fg-yellow);" id="event-title-disp">Título</h3>
+                <p class="event-desc" id="event-desc-disp">Descrição do evento de trânsito...</p>
+            </div>
+
+            <button class="modal-action-btn" id="event-continue-btn">Entendido!</button>
+        </div>
+    </div>
+
+    <!-- MODAL 3: CAIXA DE PODER RECEIVER ⚡ -->
+    <div class="modal-overlay" id="power-receive-modal">
+        <div class="modal-card">
+            <span class="modal-badge" style="background: var(--fg-pink); color: #fff;">Caixa de Poder PvP! ⚡</span>
+            <h2 class="modal-title">Você ganhou um Poder!</h2>
+
+            <div class="event-card" style="border-color: var(--fg-pink);">
+                <div class="event-icon" id="power-rec-icon">⚡</div>
+                <h3 style="font-size: 1.4rem; font-family: 'Luckiest Guy', cursive; color: var(--fg-pink);" id="power-rec-name">Nome do Poder</h3>
+                <p class="event-desc" id="power-rec-desc">Descrição do efeito do poder...</p>
+            </div>
+
+            <p style="font-size: 0.95rem; color: var(--fg-cyan); margin-bottom: 16px; font-weight: 600;">O poder foi guardado no seu inventário para ser usado no início do seu turno!</p>
+            <button class="modal-action-btn" id="power-rec-continue-btn">Guardar Poder</button>
+        </div>
+    </div>
+
+    <!-- MODAL 4: POWER USE TARGET SELECTOR ⚡ -->
+    <div class="modal-overlay" id="power-use-modal">
+        <div class="modal-card">
+            <span class="modal-badge" style="background: var(--fg-pink); color: #fff;">Ativar Poder! ⚡</span>
+            <h2 class="modal-title" id="power-use-title">Usar Poder</h2>
+            <p style="color: var(--fg-cyan); font-weight: 600;" id="power-use-instructions">Selecione o adversário alvo:</p>
+
+            <div class="targets-grid" id="power-targets-grid">
+                <!-- Target cards -->
+            </div>
+
+            <div style="display: flex; justify-content: center; gap: 14px; margin-top: 16px;">
+                <button class="modal-action-btn" id="confirm-power-btn" style="background: linear-gradient(180deg, var(--fg-pink) 0%, #b8005b 100%); color: white;" disabled>Confirmar Ataque</button>
+                <button class="modal-action-btn" id="cancel-power-btn" style="background: rgba(255,255,255,0.2); color: white;">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 6: IN-GAME NOTICE (substitui os alertas do navegador) -->
+    <div class="modal-overlay" id="notice-modal" style="z-index: 120;">
+        <div class="modal-card" id="notice-card" style="max-width: 480px;">
+            <span class="modal-badge" style="background: var(--fg-yellow); color: #000;">Aviso! 📢</span>
+            <div class="event-icon" id="notice-icon" style="margin: 6px 0;">📢</div>
+            <h2 class="modal-title" id="notice-title" style="font-size: 1.9rem;">Aviso</h2>
+            <p class="event-desc" id="notice-message" style="white-space: pre-line; margin-bottom: 22px;"></p>
+            <button class="modal-action-btn" id="notice-ok-btn">OK!</button>
+        </div>
+    </div>
+
+    <!-- MODAL 5: VICTORY & PODIUM 🏆 -->
+    <div class="modal-overlay" id="victory-modal">
+        <div class="modal-card" style="max-width: 650px;">
+            <span class="modal-badge" style="background: var(--fg-lime); color: #000;">Fim de Corrida! 🏁</span>
+            <h2 class="modal-title" style="font-size: 2.5rem;" id="winner-announcement">Jogador 1 Venceu!</h2>
+            <p style="color: var(--fg-cyan); font-weight: 600;">Chegou em primeiro lugar ao Portão da Escola!</p>
+
+            <div class="podium-container" id="podium-display">
+                <!-- Podium -->
+            </div>
+
+            <div style="background: rgba(0, 0, 0, 0.4); padding: 16px; border-radius: 18px; margin-bottom: 24px; display: flex; justify-content: space-around; border: 2px solid #000;">
+                <div>⏱️ Tempo Total: <strong id="final-time-disp">00:00</strong></div>
+                <div>🔄 Total de Rodadas: <strong id="final-turns-disp">0</strong></div>
+            </div>
+
+            <button class="start-btn" id="restart-game-btn">🔄 Jogar Novamente</button>
+        </div>
+    </div>
+
+    <!-- SOUND EFFECTS ENGINE (Web Audio API) -->
+    <script>
+        class SoundEngine {
+            constructor() {
+                this.ctx = null;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            }
+
+            playDice() {
+                this.init();
+                if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(200 + Math.random() * 300, this.ctx.currentTime);
+                gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.07);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.07);
+            }
+
+            playHop() {
+                this.init();
+                if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(350, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(750, this.ctx.currentTime + 0.14);
+                gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.14);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.14);
+            }
+
+            playTurnBanner() {
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                [300, 450, 600].forEach((freq, i) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now + i * 0.06);
+                    gain.gain.setValueAtTime(0.15, now + i * 0.06);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.06 + 0.15);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now + i * 0.06);
+                    osc.stop(now + i * 0.06 + 0.15);
+                });
+            }
+
+            playCorrect() {
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                [523.25, 659.25, 783.99].forEach((freq, i) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + i * 0.08);
+                    gain.gain.setValueAtTime(0.2, now + i * 0.08);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.08 + 0.25);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now + i * 0.08);
+                    osc.stop(now + i * 0.08 + 0.25);
+                });
+            }
+
+            playWrong() {
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(240, now);
+                osc.frequency.linearRampToValueAtTime(100, now + 0.35);
+                gain.gain.setValueAtTime(0.25, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.35);
+            }
+
+            playPower() {
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(450, now);
+                osc.frequency.exponentialRampToValueAtTime(1400, now + 0.35);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.35);
+            }
+        }
+
+        const soundFX = new SoundEngine();
+    </script>
+
+    <!-- GAME ENGINE SCRIPT -->
+    <script>
+        const AVATARS = [
+            { id: 'car', icon: '🚗', name: 'Carro Azul', color: '#00f0ff' },
+            { id: 'bike', icon: '🏍️', name: 'Moto Vermelha', color: '#ff007f' },
+            { id: 'cycle', icon: '🚲', name: 'Bicicleta Verde', color: '#39ff14' },
+            { id: 'truck', icon: '🚚', name: 'Caminhão Amarelo', color: '#ffea00' }
+        ];
+
+        const TOTAL_TILES = 36;
+        
+        const TILE_TYPES = {};
+        TILE_TYPES[0] = { type: 'start', label: 'LARGADA', icon: '🏁' };
+        TILE_TYPES[35] = { type: 'finish', label: 'ESCOLA', icon: '🏫' };
+
+        for (let i = 1; i < 35; i++) {
+            if (i === 4 || i === 12 || i === 21 || i === 27) {
+                TILE_TYPES[i] = { type: 'yellow', icon: '🎲' };
+            } else if (i === 7 || i === 16 || i === 23 || i === 30) {
+                TILE_TYPES[i] = { type: 'red', icon: '⚡' };
+            } else {
+                TILE_TYPES[i] = { type: 'blue', icon: '❓' };
+            }
+        }
+
+        // BANCO DE PERGUNTAS DE TI (75 perguntas)
+        // c = resposta correta | w = alternativas erradas | e = explicação
+        // A posição (A-D) da correta é definida em tempo de execução de forma equilibrada.
+        // Regra editorial: a resposta correta NUNCA é a alternativa mais longa.
+        const QUESTION_DATABASE = {
+            // NÍVEL FÁCIL: Recruta do TI
+            facil: [
+                { id: 1, q: "Qual componente é considerado o \"cérebro\" do computador, responsável por realizar bilhões de cálculos por segundo?", c: "Processador (CPU)", w: ["Placa-mãe (Motherboard)", "Memória RAM", "Disco Rígido (HD)"], e: "A CPU executa as instruções e os cálculos de todos os programas." },
+                { id: 2, q: "Qual das ações abaixo é o melhor exemplo de Manutenção Preventiva?", c: "Limpar a poeira e trocar a pasta térmica periodicamente.", w: ["Substituir a tela rachada do notebook depois que ele caiu no chão.", "Formatar o computador após uma invasão de vírus.", "Recuperar arquivos apagados da lixeira."], e: "A manutenção preventiva é feita antes do defeito aparecer, justamente para evitá-lo." },
+                { id: 3, q: "Qual é a principal vantagem de instalar um SSD no lugar de um HD mecânico tradicional?", c: "Liga o sistema e carrega arquivos muito mais rápido.", w: ["Oferece espaço de armazenamento praticamente infinito para sempre.", "Não precisa de energia da fonte.", "É imune a ataques de hackers."], e: "SSDs usam memória flash, sem partes móveis, com acesso muito mais rápido." },
+                { id: 4, q: "O que acontece com a Memória RAM quando o computador é desligado da tomada?", c: "Perde todos os dados, pois é volátil.", w: ["Compacta automaticamente os arquivos abertos em formato ZIP.", "Envia os dados para a nuvem.", "Entra em modo de hibernação."], e: "A RAM só guarda informações enquanto recebe energia." },
+                { id: 5, q: "Qual é o papel da Fonte de Alimentação no funcionamento do computador?", c: "Converter a energia da tomada e distribuí-la às peças.", w: ["Gerar os gráficos 3D exibidos no monitor durante os jogos.", "Armazenar os backups diários.", "Resfriar o interior do gabinete."], e: "A fonte converte corrente alternada (AC) em contínua (DC) nas tensões corretas para cada peça." },
+                { id: 6, q: "Onde todos os principais componentes do computador (CPU, RAM, Placa de Vídeo) são conectados para se comunicarem?", c: "Na Placa-Mãe", w: ["Na Fonte de Alimentação", "No Gabinete", "No Monitor"], e: "A placa-mãe interliga todos os componentes por meio de seus barramentos." },
+                { id: 7, q: "Qual é a principal função de um software de Backup?", c: "Criar cópias de segurança de arquivos.", w: ["Aumentar a velocidade da conexão com a internet.", "Limpar o teclado do computador.", "Bloquear anúncios em sites."], e: "O backup protege contra perda de dados por falhas, vírus ou acidentes." },
+                { id: 8, q: "O que é o \"Cooler\" em um computador?", c: "Dissipador e ventoinha que resfriam as peças.", w: ["Um programa que congela a tela quando detecta um vírus.", "A luz de LED do gabinete.", "Um tipo de memória ultrarrápida."], e: "O cooler retira o calor dos componentes, evitando superaquecimento." },
+                { id: 9, q: "Se um usuário derrama café no teclado do notebook e ele para de funcionar, que tipo de manutenção será necessária?", c: "Manutenção Corretiva", w: ["Manutenção Preventiva", "Manutenção Preditiva", "Nenhuma, ele conserta sozinho ao secar"], e: "A manutenção corretiva conserta um defeito que já aconteceu." },
+                { id: 10, q: "Qual cabo de vídeo moderno transmite tanto imagem em alta definição quanto áudio digital?", c: "Cabo HDMI", w: ["Cabo VGA", "Cabo de Força", "Cabo Serial"], e: "O HDMI leva vídeo HD e áudio digital no mesmo cabo; o VGA transmite apenas vídeo analógico." },
+                { id: 11, q: "O que significa a sigla \"USB\"?", c: "Universal Serial Bus", w: ["Unit System Backup Drive", "User Security Block", "Upload Speed Boost"], e: "USB significa Barramento Serial Universal, o padrão de conexão de periféricos." },
+                { id: 12, q: "Para que serve a pasta térmica?", c: "Melhorar a transferência de calor da CPU ao dissipador.", w: ["Colar o processador permanentemente na placa-mãe para não soltar.", "Proteger os componentes contra vírus térmicos.", "Lubrificar a ventoinha da fonte."], e: "Ela preenche as microimperfeições entre as superfícies, eliminando bolhas de ar." },
+                { id: 13, q: "Qual software básico é o primeiro a carregar e gerencia todos os recursos do computador, como o Windows ou o Linux?", c: "Sistema Operacional", w: ["Pacote Office", "Navegador Web (Chrome, Firefox)", "Antivírus"], e: "O Sistema Operacional gerencia hardware, memória e programas." },
+                { id: 14, q: "Um pendrive é considerado qual tipo de dispositivo?", c: "Dispositivo de Armazenamento", w: ["Dispositivo de Processamento", "Dispositivo de Saída de Vídeo", "Dispositivo de Refrigeração"], e: "O pendrive guarda dados em memória flash." },
+                { id: 15, q: "Quando o computador está muito sujo de poeira por dentro, qual é o sintoma mais comum?", c: "Superaquece e as ventoinhas fazem muito barulho.", w: ["A conexão com a internet fica lenta e cai toda hora.", "As cores do monitor ficam invertidas.", "O teclado digita letras erradas."], e: "A poeira bloqueia o fluxo de ar e funciona como isolante térmico." },
+                { id: 16, q: "O que é um \"Periférico de Entrada\"?", c: "Dispositivo que envia dados ao PC (ex: teclado).", w: ["O cabo de energia que liga a fonte à tomada da parede.", "O monitor que mostra a imagem.", "A porta de entrada do laboratório."], e: "Entrada: teclado, mouse, scanner. Saída: monitor, impressora." },
+                { id: 17, q: "O que é o \"Gabinete\" na informática?", c: "A caixa que abriga os componentes internos.", w: ["A mesa ou bancada onde o computador fica apoiado.", "O grupo de técnicos de suporte.", "O programa que guarda senhas."], e: "O gabinete protege as peças e organiza o fluxo de ar." },
+                { id: 18, q: "Qual das opções é uma ferramenta essencial para a manutenção física de PCs?", c: "Chave Philips e pincel antiestático.", w: ["Martelo e pregos.", "Tesoura e fita dupla-face.", "Alicate de pressão, cola quente e estilete."], e: "As chaves abrem o gabinete; o pincel antiestático limpa sem gerar descargas." },
+                { id: 19, q: "Ao ligar o computador, a tela mostra o logotipo do fabricante (ex: Dell, HP, Asus). De onde vem essa tela inicial?", c: "Do BIOS/UEFI gravado na placa-mãe.", w: ["Do disco rígido.", "Da memória RAM.", "De um servidor do fabricante na internet."], e: "O firmware BIOS/UEFI roda antes do sistema operacional." },
+                { id: 20, q: "O que significa \"formatar\" um disco rígido?", c: "Apagar os dados e preparar o disco para novo uso.", w: ["Limpar a poeira física acumulada dentro da carcaça dele.", "Colocar o HD no formato quadrado.", "Desbloquear a velocidade máxima do disco."], e: "Formatar cria um novo sistema de arquivos (NTFS, ext4...)." },
+                { id: 21, q: "O botão \"Power\" do gabinete é conectado em qual parte da placa-mãe?", c: "Nos conectores do Painel Frontal.", w: ["No soquete do processador.", "Na porta USB traseira.", "Diretamente nos slots da memória RAM."], e: "O Front Panel recebe os cabos de Power, Reset e LEDs do gabinete." },
+                { id: 22, q: "Um usuário precisa conectar o computador à internet com cabo, mas a escola não tem Wi-Fi. Qual conector ele usará?", c: "RJ-45 (Rede Ethernet)", w: ["P2 (Áudio)", "HDMI (Vídeo)", "SATA (Dados do armazenamento)"], e: "O RJ-45 é o conector padrão dos cabos de rede." },
+                { id: 23, q: "Por que não devemos usar o computador apoiado em cobertores ou travesseiros?", c: "Porque obstrui as saídas de ar e superaquece.", w: ["Porque gera choque estático forte no usuário ao tocar.", "Porque o tecido apaga os dados do HD.", "Porque o monitor perde o brilho."], e: "Sem circulação de ar, o calor fica preso dentro do equipamento." },
+                { id: 24, q: "O que é Hardware?", c: "A parte física do computador, que podemos tocar.", w: ["Todos os programas e aplicativos instalados no computador.", "O sistema de segurança da rede.", "Os arquivos guardados na nuvem."], e: "Hardware é a parte física; software são os programas." },
+                { id: 25, q: "Quando um usuário abre 30 abas do navegador ao mesmo tempo e o PC começa a travar por falta de espaço temporário, qual peça atingiu seu limite?", c: "A Memória RAM", w: ["O Processador", "O Disco Rígido", "A Placa de Som"], e: "Cada aba ocupa RAM; quando ela acaba, o sistema passa a usar o disco e fica lento." }
+            ],
+            // NÍVEL MÉDIO: Técnico de Bancada
+            media: [
+                { id: 26, q: "Um computador liga, mas emite bipes longos e repetitivos e a tela fica preta. Qual é a causa mais comum desse sintoma?", c: "A RAM está mal encaixada ou com contatos oxidados.", w: ["O Windows está desatualizado e precisa de atualização.", "O HD está com defeito físico.", "O filtro de linha está desligado."], e: "Bipes longos e repetidos no POST costumam indicar falha de memória." },
+                { id: 27, q: "Na regra \"3-2-1\" de Backup, o que o número \"1\" representa?", c: "Manter 1 cópia fora do local (ex: nuvem).", w: ["Fazer 1 backup completo a cada hora do dia.", "Usar 1 pendrive exclusivo.", "Ter 1 técnico responsável."], e: "3 cópias, em 2 mídias diferentes, sendo 1 fora do local físico." },
+                { id: 28, q: "Qual é a grande vantagem do Backup Incremental em relação ao Completo?", c: "É mais rápido: copia só o que mudou desde o último backup.", w: ["Ocupa todo o espaço do HD externo para garantir mais segurança.", "Não precisa de internet para ser restaurado.", "Ignora vírus automaticamente."], e: "Como copia apenas as alterações, o incremental é rápido e ocupa pouco espaço." },
+                { id: 29, q: "O que significa a sigla POST (Power-On Self-Test)?", c: "Autoteste que verifica o hardware ao ligar.", w: ["Transferência Primária de Sistema operacional.", "Tempo de Resposta da Tela.", "Envio de e-mail de suporte automático."], e: "O POST checa CPU, RAM e vídeo antes de iniciar o boot." },
+                { id: 30, q: "Se o usuário relatar um barulho de \"clique-clique\" contínuo vindo do gabinete e travamentos, qual é o diagnóstico?", c: "O HD mecânico sofreu dano físico (Head Crash).", w: ["O sistema foi corrompido por um Ransomware perigoso.", "O cabo de rede está solto.", "A fonte está convertendo energia demais."], e: "O clique é a cabeça de leitura falhando. Faça backup imediatamente!" },
+                { id: 31, q: "O que utilizamos comumente para remover a oxidação leve dos contatos dourados da Memória RAM de forma segura na bancada?", c: "Borracha escolar macia ou álcool isopropílico.", w: ["Lixa d'água grossa.", "Palha de aço (Bombril).", "Água com sabão neutro esfregada com escova de dentes."], e: "São métodos suaves que não arranham nem molham os contatos." },
+                { id: 32, q: "Em uma placa-mãe, qual é a função da pequena bateria de lítio (CR2032)?", c: "Manter data, hora e configurações do BIOS salvas.", w: ["Manter o computador ligado durante uma queda de energia.", "Fornecer energia extra para a Placa de Vídeo.", "Carregar o celular pela porta USB."], e: "A bateria alimenta o chip CMOS enquanto o PC está desligado." },
+                { id: 33, q: "Qual ferramenta de software é ideal para prestar Suporte Técnico à distância (Acesso Remoto)?", c: "AnyDesk ou TeamViewer", w: ["Microsoft Word", "Adobe Photoshop Express", "Google Chrome"], e: "Essas ferramentas permitem controlar o PC do usuário pela internet." },
+                { id: 34, q: "O que é o \"Zinabre\" encontrado em computadores expostos à maresia ou alta umidade?", c: "Oxidação esverdeada que corrói contatos metálicos.", w: ["Um tipo de vírus de computador muito perigoso e difícil de remover.", "Um tipo de pasta térmica importada.", "Um software de backup da nuvem."], e: "Umidade e sal aceleram a oxidação do cobre." },
+                { id: 35, q: "O que difere um Backup Diferencial de um Backup Incremental?", c: "Diferencial copia o que mudou desde o último completo; incremental, desde o último backup.", w: ["O diferencial só funciona com pendrives, enquanto o incremental é feito exclusivamente na nuvem.", "O diferencial não salva fotos, apenas documentos.", "São exatamente a mesma coisa."], e: "O diferencial cresce a cada dia; o incremental é menor, mas a restauração exige toda a cadeia de backups." },
+                { id: 36, q: "Como é chamado o ataque cibernético que sequestra os arquivos do computador criptografando-os e cobra um resgate?", c: "Ransomware", w: ["Phishing", "Cavalo de Troia", "Adware"], e: "O Ransomware é o motivo nº 1 para mantermos backups rigorosos." },
+                { id: 37, q: "Qual cabo é responsável por transmitir os DADOS do HD/SSD para a placa-mãe?", c: "Cabo SATA de dados", w: ["Cabo de força ATX 24 pinos", "Cabo P2", "Cabo VGA"], e: "O SATA de dados leva as informações; a energia vem pelo cabo SATA de força." },
+                { id: 38, q: "Se o computador entra direto na tela do BIOS toda vez que é ligado e não carrega o Windows, o que provavelmente falhou?", c: "O HD/SSD não é reconhecido ou o Windows corrompeu.", w: ["O teclado está desconectado da porta USB traseira do gabinete.", "O monitor está desligado.", "A fonte queimou."], e: "Sem um dispositivo de boot válido, o PC abre o setup do BIOS." },
+                { id: 39, q: "Qual é a temperatura de operação considerada crítica (perigosa) para a maioria dos processadores modernos trabalhando sob carga?", c: "Acima de 90°C a 100°C", w: ["Acima de 35°C", "Acima de 50°C em qualquer uso", "Acima de 150°C"], e: "Perto de 100°C a CPU reduz o clock ou desliga para se proteger." },
+                { id: 40, q: "Qual comando do \"Prompt de Comando\" do Windows o técnico usa para testar se há conexão de internet com outro servidor?", c: "PING", w: ["FORMAT C:", "CHKDSK", "DIR"], e: "O PING envia pacotes e mede se o destino responde." },
+                { id: 41, q: "Se você ligar uma fonte que está chaveada para 110V diretamente em uma tomada 220V, o que acontecerá?", c: "A fonte queima pela sobretensão.", w: ["O computador ficará duas vezes mais rápido.", "O Windows pedirá uma atualização.", "Nada, a fonte se adapta sozinha."], e: "A fonte recebe o dobro da tensão para a qual foi ajustada." },
+                { id: 42, q: "Qual a função do Álcool Isopropílico na manutenção?", c: "Limpar placas e contatos, pois quase não tem água.", w: ["Limpar a tela do monitor para deixá-la com mais brilho e cor.", "Misturar com a pasta térmica para render mais.", "Lubrificar os eixos das ventoinhas."], e: "Ele tem menos de 1% de água, evapora rápido e não oxida as peças." },
+                { id: 43, q: "O que é a Eletricidade Estática (ESD) na bancada de manutenção?", c: "Carga acumulada no corpo que pode queimar componentes.", w: ["A energia elétrica que faz girar os pratos do disco rígido.", "A energia fornecida pelo no-break.", "A luz gerada pelos coolers RGB."], e: "Use pulseira antiestática e toque em metal aterrado antes de mexer nas peças." },
+                { id: 44, q: "O que é um \"No-Break\" (UPS)?", c: "Equipamento com bateria que mantém o PC ligado após queda de luz.", w: ["Um programa que impede o computador de travar durante tarefas pesadas e jogos.", "Uma peça de acrílico que protege o teclado.", "Uma ferramenta de acesso remoto ininterrupto."], e: "O no-break dá tempo para salvar o trabalho e desligar com segurança." },
+                { id: 45, q: "Qual é o sintoma clássico de que a pasta térmica ressecou e virou pedra?", c: "A temperatura dispara e o PC desliga sob esforço.", w: ["As portas USB frontais param de reconhecer pendrives e mouses.", "O som do PC para de funcionar.", "O PC perde a hora do relógio."], e: "Pasta ressecada não transfere o calor da CPU para o dissipador." },
+                { id: 46, q: "Em atendimento de Suporte, o que é SLA (Service Level Agreement)?", c: "Acordo que define o prazo máximo de atendimento.", w: ["Um protocolo de rede usado para conectar servidores à internet.", "Um antivírus gratuito.", "A marca da placa de vídeo."], e: "SLA = Acordo de Nível de Serviço entre o suporte e o cliente." },
+                { id: 47, q: "Qual slot da placa-mãe é utilizado exclusivamente para conectar a Placa de Vídeo Dedicada?", c: "Slot PCI Express x16", w: ["Slot de Memória DDR4", "Conector SATA 3", "Soquete AM4 do processador"], e: "O PCIe x16 oferece a maior largura de banda, ideal para GPUs." },
+                { id: 48, q: "Se um computador não liga e não dá nenhum sinal de vida (nenhum LED, nenhum bipe), qual é a primeira peça que o técnico deve testar?", c: "A fonte e o cabo de força.", w: ["A Memória RAM.", "O Processador.", "O HD e o cabo SATA de dados."], e: "Sem nenhum sinal de vida, o problema geralmente é de energia." },
+                { id: 49, q: "O que significa o conceito de \"Hot-Swap\" encontrado em servidores e alguns computadores modernos?", c: "Trocar peças (ex: HDs) com o sistema ligado.", w: ["Trocar a pasta térmica enquanto o processador ainda está quente.", "Um backup feito na nuvem em tempo real.", "O roubo de dados via Wi-Fi."], e: "Muito usado em servidores para não interromper serviços críticos." },
+                { id: 50, q: "Ao abrir um chamado, o usuário diz \"O monitor está dizendo 'No Signal'\". Qual o procedimento de suporte correto?", c: "Pedir para verificar o encaixe do cabo de vídeo no PC e no monitor.", w: ["Formatar o computador remotamente para reinstalar todos os drivers de vídeo.", "Pedir para ele comprar um monitor novo.", "Trocar a memória RAM do monitor."], e: "'No Signal' quase sempre é cabo solto ou entrada de vídeo errada." }
+            ],
+            // NÍVEL DIFÍCIL: Especialista de Servidores
+            dificil: [
+                { id: 51, q: "O que é o efeito de \"Thermal Throttling\" nos processadores?", c: "Redução automática do clock para baixar a temperatura.", w: ["Uma falha em que os pinos do processador derretem no soquete.", "O congelamento das ventoinhas.", "O travamento da BIOS."], e: "A CPU se protege sacrificando desempenho quando esquenta demais." },
+                { id: 52, q: "O Windows só reconhece 2 Terabytes de um HD de 4 Terabytes. Qual é a causa técnica?", c: "O disco foi particionado em MBR em vez de GPT.", w: ["A fonte não tem potência suficiente para alimentar o disco inteiro.", "O cabo SATA é antigo.", "Falta de permissão de administrador."], e: "A tabela MBR só endereça até 2 TB; a GPT suporta discos muito maiores." },
+                { id: 53, q: "Quais proteções ativas uma fonte de alta qualidade deve ter contra problemas elétricos?", c: "OVP (sobretensão) e OPP (sobrecarga)", w: ["MBR e GPT", "DHCP (endereços IP) e DNS (resolução de nomes)", "SATA e NVMe"], e: "Essas proteções desligam a fonte antes que ela danifique as outras peças." },
+                { id: 54, q: "Qual é o sintoma clássico de capacitores eletrolíticos estufados no circuito VRM da placa-mãe?", c: "Telas azuis, travamentos e energia instável na CPU.", w: ["Perda constante do sinal Wi-Fi e da conexão Bluetooth do computador.", "Áudio com chiado estático.", "HD formatado sozinho."], e: "Capacitores estufados não filtram bem a tensão que alimenta o processador." },
+                { id: 55, q: "Qual é a função do módulo TPM 2.0, exigido para a instalação do Windows 11?", c: "Funções criptográficas em hardware para segurança.", w: ["Otimizar os gráficos de jogos usando aceleração dedicada no chip.", "Controlar a rotação dos coolers.", "Melhorar o ping em jogos online."], e: "O TPM guarda chaves de criptografia (ex: BitLocker) e apoia o Secure Boot." },
+                { id: 56, q: "O que a certificação \"80 Plus\" garante em uma Fonte de Alimentação?", c: "Eficiência mínima de 80% na conversão de energia.", w: ["Que ela entrega 80 watts extras para alimentar a placa de vídeo.", "Que ela durará 80 anos.", "Que ela possui 80 proteções contra vírus."], e: "Mais eficiência significa menos energia desperdiçada em forma de calor." },
+                { id: 57, q: "No contexto de armazenamento em servidores, o que é um arranjo RAID 1 (Espelhamento)?", c: "Os mesmos dados gravados em dois discos ao mesmo tempo.", w: ["A soma de dois HDs em um só volume para dobrar a velocidade de leitura.", "O backup na nuvem criptografado.", "A formatação segura de discos velhos."], e: "Se um disco falhar, o outro tem a cópia idêntica. (Somar velocidade é o RAID 0.)" },
+                { id: 58, q: "O que indica o parâmetro TBW (Terabytes Written) nas especificações de um SSD?", c: "O total de dados que pode ser gravado antes do desgaste.", w: ["A velocidade máxima da conexão de internet que o SSD consegue suportar.", "O espaço livre no disco.", "O peso do componente."], e: "As células de memória flash suportam um número limitado de ciclos de escrita." },
+                { id: 59, q: "Qual a diferença técnica entre um SSD SATA 3 e um SSD NVMe M.2?", c: "O NVMe usa o barramento PCIe, sendo muito mais rápido.", w: ["O SATA 3 é exclusivo para notebooks e o NVMe serve apenas para desktops.", "O SATA 3 não pega vírus.", "O NVMe precisa de refrigeração líquida."], e: "O SATA 3 limita a cerca de 600 MB/s; o NVMe ultrapassa 3.000 MB/s." },
+                { id: 60, q: "Em redes corporativas, para que serve o comando \"TRACERT\" (Trace Route) no CMD?", c: "Mostrar os saltos entre roteadores até o destino.", w: ["Apagar os rastros de navegação e o histórico do usuário no navegador.", "Bloquear acessos não autorizados.", "Fazer backup automático na nuvem."], e: "Ajuda a encontrar em que ponto da rota está o gargalo ou a falha." },
+                { id: 61, q: "O que é o S.M.A.R.T. em relação aos Discos Rígidos e SSDs?", c: "Automonitoramento que alerta sobre falhas iminentes do disco.", w: ["Um antivírus embutido diretamente no hardware do disco rígido para bloquear ameaças.", "O cabo inteligente de força.", "A marca do dissipador."], e: "Ferramentas como o CrystalDiskInfo leem os dados S.M.A.R.T. do disco." },
+                { id: 62, q: "O que é \"Corrosão Galvânica\" na manutenção de computadores customizados?", c: "Corrosão entre metais diferentes em contato com um fluido.", w: ["O desgaste natural da borracha que envolve os cabos de rede com o tempo.", "O cheiro de queimado da fonte de alimentação.", "O ataque de vírus via pendrive."], e: "Ex: cobre e alumínio no mesmo circuito de um water cooler." },
+                { id: 63, q: "No modelo OSI de redes de computadores, um problema físico de cabo de rede rompido (sem link) encontra-se em qual camada?", c: "Camada 1 (Física)", w: ["Camada 7 (Aplicação)", "Camada 3 (Rede)", "Camada 4 (Transporte)"], e: "Cabos, conectores e sinais elétricos pertencem à camada física." },
+                { id: 64, q: "Qual a finalidade da pasta térmica contendo \"Prata\" ou \"Metal Líquido\" na sua composição?", c: "Mais condutividade térmica, mas conduz eletricidade e pode causar curto.", w: ["Deixar o visual interno da placa-mãe mais elegante e brilhante em gabinetes com lateral de vidro.", "Reduzir o custo de fabricação.", "Evitar ferrugem no gabinete."], e: "Exige aplicação cuidadosa para não escorrer sobre os componentes." },
+                { id: 65, q: "O que significa \"PFC Ativo\" (Power Factor Correction) em uma Fonte ATX?", c: "Circuito que corrige a onda de energia e dispensa chave 110/220V.", w: ["Uma luz vermelha na traseira da fonte que acende quando ela está sobrecarregada.", "O botão de ligar/desligar da fonte.", "O sistema que desliga a internet em caso de chuva."], e: "Fontes com PFC ativo costumam ser bivolt automáticas e mais eficientes." },
+                { id: 66, q: "Na arquitetura clássica das placas-mãe antigas, qual chip (Ponte) controlava o fluxo de dados ultrarrápidos (Processador, Memória e Placa de Vídeo)?", c: "Ponte Norte (Northbridge)", w: ["Ponte Sul (Southbridge)", "BIOS", "Controlador de Rede integrado (NIC)"], e: "A Ponte Sul cuidava dos periféricos mais lentos (USB, SATA, áudio)." },
+                { id: 67, q: "Para ressuscitar uma placa-mãe que não dá vídeo devido a uma configuração errada feita pelo usuário, qual o procedimento técnico sem precisar de ferramentas avançadas?", c: "Fazer Clear CMOS (jumper ou retirar a bateria).", w: ["Formatar o HD e reinstalar o sistema operacional do zero pelo pendrive.", "Lixar o processador.", "Trocar o cabo de rede."], e: "O reset devolve o BIOS às configurações de fábrica." },
+                { id: 68, q: "Se um servidor corporativo possui discos em RAID 5, qual a característica principal desse arranjo?", c: "Paridade distribuída em 3+ discos; tolera a falha de 1.", w: ["Espelha os mesmos dados de forma idêntica em dez discos rígidos ao mesmo tempo.", "Usa apenas 1 disco muito rápido.", "Criptografa todos os dados contra Ransomware."], e: "Com a paridade, os dados do disco perdido podem ser reconstruídos." },
+                { id: 69, q: "Qual a diferença fundamental entre UEFI e Legacy BIOS?", c: "UEFI suporta GPT e discos acima de 2TB; o Legacy usa MBR.", w: ["O UEFI é exclusivo para computadores Mac e o BIOS Legacy serve apenas para Windows.", "O UEFI é um antivírus e o BIOS é hardware.", "Não há diferença prática."], e: "O UEFI também oferece interface gráfica, suporte a mouse e Secure Boot." },
+                { id: 70, q: "O que significa o erro BSOD \"IRQL_NOT_LESS_OR_EQUAL\" no Windows?", c: "Tela azul por driver defeituoso ou falha na RAM.", w: ["A fonte de alimentação não tem energia suficiente para a placa de vídeo.", "A licença do Word expirou.", "O cabo HDMI foi desconectado."], e: "Ocorre quando algo tenta acessar um endereço de memória inválido." },
+                { id: 71, q: "O que é um arquivo \".VHD\" ou \".VHDX\" no suporte técnico?", c: "Um disco rígido virtual, usado em VMs e backups.", w: ["Um arquivo de vídeo em altíssima definição gravado por câmeras profissionais.", "Um script malicioso de vírus.", "O instalador do Windows."], e: "Muito usado no Hyper-V, no VirtualBox e em imagens de sistema." },
+                { id: 72, q: "Durante o planejamento de prevenção (Disaster Recovery), o que significa RPO (Recovery Point Objective)?", c: "A perda máxima de dados aceitável (ex: 4 horas).", w: ["O tempo que o técnico demora para chegar à empresa após o chamado.", "O nome do software de backup.", "O local físico onde o servidor fica."], e: "O RPO define a frequência mínima dos backups. (O tempo para voltar a operar é o RTO.)" },
+                { id: 73, q: "Qual componente de um disco mecânico é o responsável pelo clássico e irreparável \"Head Crash\" (Batida de Agulha)?", c: "As cabeças de leitura raspando nos pratos magnéticos.", w: ["O motor elétrico de rotação (Spindle) travando por falta de lubrificação.", "O conector SATA quebrando.", "A placa lógica traseira oxidada."], e: "O contato destrói a superfície magnética e os dados gravados nela." },
+                { id: 74, q: "No suporte remoto de uma rede corporativa usando Active Directory (AD), qual a principal função de um \"Controlador de Domínio\"?", c: "Autenticar usuários e aplicar políticas de forma centralizada.", w: ["Controlar o consumo de energia dos monitores de todos os computadores da rede.", "Impedir o acesso ao YouTube.", "Fazer o backup diário das máquinas locais."], e: "O Controlador de Domínio valida os logins e distribui as GPOs para toda a rede." },
+                { id: 75, q: "O que é um \"Bootloader\" (ex: GRUB, Windows Boot Manager)?", c: "Programa que carrega o Kernel do sistema na RAM.", w: ["Um carregador de celular que funciona conectado à porta USB do computador.", "Um vírus de pendrive.", "O programa que limpa a lixeira."], e: "Ele fica no início do disco e inicia o núcleo do Sistema Operacional." }
+            ]
+        };
+
+        // Verificação de segurança: avisa no console se alguma correta for a mais longa
+        Object.values(QUESTION_DATABASE).flat().forEach(item => {
+            if (item.w.some(x => x.length >= item.c.length) === false) {
+                console.warn(`Pergunta ${item.id}: a resposta correta é a mais longa.`);
+            }
+        });
+
+        const RANDOM_EVENTS = [
+            {
+                title: "Veículo Pegando Fogo! 🔥",
+                desc: "🚨 SINTOMA: O motor superaqueceu por fricção extrema no radiador! O veículo pegou fogo e você perde 1 rodada apagando o incêndio!",
+                effect: 'debuff',
+                debuffType: 'fire',
+                debuffLabel: 'Em Chamas 🔥',
+                icon: '🔥'
+            },
+            {
+                title: "Acabou o Combustível! ⛽",
+                desc: "🚨 SINTOMA: O tanque esvaziou no meio da pista! Fique 1 rodada sem jogar aguardando o guincho com gasolina!",
+                effect: 'debuff',
+                debuffType: 'fuel',
+                debuffLabel: 'Sem Gasolina ⛽',
+                icon: '⛽'
+            },
+            {
+                title: "Pneu Furou! 🛞",
+                desc: "🚨 SINTOMA: A borracharia derrapou no prego! O pneu murchou completamente e você perde 1 rodada fazendo a troca!",
+                effect: 'debuff',
+                debuffType: 'tire',
+                debuffLabel: 'Pneu Furado 🛞',
+                icon: '🛞'
+            },
+            {
+                title: "Onda Verde! 🟢",
+                desc: "Você manteve a velocidade constante e pegou todos os semáforos abertos. Avançe 2 casas!",
+                effect: 'move',
+                value: 2,
+                icon: '🚥'
+            },
+            {
+                title: "Óleo na Pista! ⚠️",
+                desc: "Perda drástica de atrito! Seu veículo derrapou no óleo e voltou 2 casas.",
+                effect: 'move',
+                value: -2,
+                icon: '🛢️'
+            },
+            {
+                title: "Vento de Cauda! 💨",
+                desc: "Um vento forte a favor reduziu a resistência do ar! Avançe 3 casas.",
+                effect: 'move',
+                value: 3,
+                icon: '💨'
+            }
+        ];
+
+        const POWER_CARDS = [
+            {
+                id: 'radar',
+                name: 'Multa de Radar 📸',
+                desc: 'Escolha um adversário para levar uma multa e ficar 1 rodada sem jogar.',
+                icon: '📸'
+            },
+            {
+                id: 'vacuo',
+                name: 'Vácuo Aerodinâmico 🏎️',
+                desc: 'Escolha o adversário à sua frente e troque de lugar com ele instantaneamente!',
+                icon: '🏎️'
+            },
+            {
+                id: 'freio',
+                name: 'Freio Brusco 🛑',
+                desc: 'Obrigue um adversário à sua escolha a acionar os freios e voltar 2 casas.',
+                icon: '🛑'
+            }
+        ];
+
+        class GameEngine {
+            constructor() {
+                this.players = [];
+                this.currentPlayerIdx = 0;
+                this.turnNumber = 1;
+                this.startTime = null;
+                this.timerInterval = null;
+                this.isAnimating = false;
+                this.pendingPower = null;
+                this.selectedPowerTarget = null;
+                this.activeQuestion = null;
+                
+                // TRACK USED QUESTIONS TO PREVENT REPETITION
+                this.usedQuestions = new Set();
+
+                this.initUI();
+                this.initCanvas();
+            }
+
+            initUI() {
+                document.querySelectorAll('.count-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.count-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        this.renderSetupCards(parseInt(btn.dataset.count));
+                    });
+                });
+
+                this.renderSetupCards(2);
+
+                document.getElementById('start-game-btn').addEventListener('click', () => this.startGame());
+                document.getElementById('roll-dice-btn').addEventListener('click', () => this.handleRollDice());
+                document.getElementById('use-power-btn').addEventListener('click', () => this.openPowerUseModal());
+                document.getElementById('restart-game-btn').addEventListener('click', () => location.reload());
+
+                this.bindModalEvents();
+            }
+
+            renderSetupCards(count) {
+                const list = document.getElementById('players-config-list');
+                list.innerHTML = '';
+
+                for (let i = 0; i < count; i++) {
+                    const avatar = AVATARS[i % AVATARS.length];
+                    const card = document.createElement('div');
+                    card.className = 'player-config-card';
+                    card.innerHTML = `
+                        <div class="player-number-badge" style="background: ${avatar.color};">P${i+1}</div>
+                        <div class="player-input-group">
+                            <label>Nome do Jogador ${i+1}</label>
+                            <input type="text" id="player-name-${i}" value="Jogador ${i+1}">
+                        </div>
+                        <div class="player-input-group" style="flex: 0 0 auto;">
+                            <label>Veículo</label>
+                            <div class="avatar-selector" id="avatar-sel-${i}">
+                                ${AVATARS.map((av, avIdx) => `
+                                    <div class="avatar-opt ${avIdx === i ? 'selected' : ''}" data-avatar-idx="${avIdx}">${av.icon}</div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                    list.appendChild(card);
+
+                    const opts = card.querySelectorAll('.avatar-opt');
+                    opts.forEach(opt => {
+                        opt.addEventListener('click', () => {
+                            opts.forEach(o => o.classList.remove('selected'));
+                            opt.classList.add('selected');
+                        });
+                    });
+                }
+            }
+
+            async startGame() {
+                const count = parseInt(document.querySelector('.count-btn.active').dataset.count);
+                this.players = [];
+                this.usedQuestions.clear();
+
+                for (let i = 0; i < count; i++) {
+                    const name = document.getElementById(`player-name-${i}`).value || `Jogador ${i+1}`;
+                    const selectedOpt = document.querySelector(`#avatar-sel-${i} .avatar-opt.selected`);
+                    const avIdx = parseInt(selectedOpt.dataset.avatarIdx);
+                    const avatar = AVATARS[avIdx];
+
+                    this.players.push({
+                        id: i,
+                        name: name,
+                        icon: avatar.icon,
+                        color: avatar.color,
+                        tile: 0,
+                        powers: [],
+                        debuff: null,
+                        skipNextTurn: false,
+                        stats: { correct: 0, wrong: 0 }
+                    });
+                }
+
+                document.getElementById('setup-screen').style.display = 'none';
+                document.getElementById('game-screen').style.display = 'flex';
+
+                this.startTime = Date.now();
+                this.timerInterval = setInterval(() => this.updateTimer(), 1000);
+                this.drawBoard();
+                
+                await this.startTurnSequence();
+            }
+
+            updateTimer() {
+                const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
+                const mins = String(Math.floor(elapsed / 60)).padStart(2, '0');
+                const secs = String(elapsed % 60).padStart(2, '0');
+                document.getElementById('game-timer').innerText = `${mins}:${secs}`;
+            }
+
+            renderHUD() {
+                const container = document.getElementById('players-hud-bar');
+                container.innerHTML = '';
+
+                this.players.forEach((p, idx) => {
+                    const card = document.createElement('div');
+                    card.className = `player-hud-card ${idx === this.currentPlayerIdx ? 'active-turn' : ''}`;
+                    
+                    let statusBadgeHTML = '';
+                    if (p.debuff) {
+                        statusBadgeHTML = `<span class="status-tag">${p.debuff.icon} ${p.debuff.label}</span>`;
+                    } else if (p.skipNextTurn) {
+                        statusBadgeHTML = `<span class="status-tag">Sem Jogar 🚫</span>`;
+                    }
+
+                    card.innerHTML = `
+                        ${statusBadgeHTML}
+                        <div class="hud-avatar" style="background: ${p.color};">
+                            ${p.icon}
+                            ${p.debuff ? `<span style="position: absolute; bottom: -6px; right: -6px; font-size: 1.2rem;">${p.debuff.icon}</span>` : ''}
+                        </div>
+                        <div class="hud-info">
+                            <span class="hud-name" style="color: ${p.color}">${p.name}</span>
+                            <span class="hud-tile">Casa: <strong>${p.tile}</strong> / ${TOTAL_TILES - 1}</span>
+                            <div class="hud-inventory">
+                                ${p.powers.map(pw => `<span class="power-tag">${pw.icon} ${pw.name}</span>`).join('')}
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+
+            async startTurnSequence() {
+                const currentP = this.players[this.currentPlayerIdx];
+
+                this.renderHUD();
+                document.getElementById('current-player-icon').innerText = currentP.icon;
+                document.getElementById('current-player-text').innerText = `Vez de ${currentP.name}`;
+                document.getElementById('turn-counter').innerText = this.turnNumber;
+
+                await this.showTurnBanner(currentP);
+
+                const powerBtn = document.getElementById('use-power-btn');
+                powerBtn.disabled = currentP.powers.length === 0;
+
+                // GUARANTEE ROLL BUTTON IS ENABLED
+                const rollBtn = document.getElementById('roll-dice-btn');
+                rollBtn.disabled = false;
+                this.isAnimating = false;
+            }
+
+            showTurnBanner(player) {
+                return new Promise(resolve => {
+                    soundFX.playTurnBanner();
+                    const overlay = document.getElementById('turn-banner-overlay');
+                    document.getElementById('overlay-avatar').innerText = player.icon;
+                    document.getElementById('overlay-player-name').innerText = `VEZ DE ${player.name.toUpperCase()}!`;
+                    document.getElementById('overlay-player-name').style.color = player.color;
+
+                    overlay.classList.add('active');
+
+                    setTimeout(() => {
+                        overlay.classList.remove('active');
+                        resolve();
+                    }, 1200);
+                });
+            }
+
+            // IN-GAME NOTICE PANEL (replaces browser alert). Resolves when player clicks OK.
+            showNotice({ icon = '📢', title = 'Aviso', message = '', color = 'var(--fg-yellow)', button = 'OK!' } = {}) {
+                return new Promise(resolve => {
+                    const modal = document.getElementById('notice-modal');
+                    document.getElementById('notice-icon').innerText = icon;
+                    const titleEl = document.getElementById('notice-title');
+                    titleEl.innerText = title;
+                    titleEl.style.color = color;
+                    document.getElementById('notice-card').style.borderColor = color;
+                    document.getElementById('notice-message').innerText = message;
+                    const btn = document.getElementById('notice-ok-btn');
+                    btn.innerText = button;
+
+                    const close = () => {
+                        btn.removeEventListener('click', close);
+                        modal.classList.remove('active');
+                        resolve();
+                    };
+                    btn.addEventListener('click', close);
+                    modal.classList.add('active');
+                    btn.focus();
+                });
+            }
+
+            async handleRollDice() {
+                if (this.isAnimating) return;
+
+                const currentP = this.players[this.currentPlayerIdx];
+
+                if (currentP.debuff || currentP.skipNextTurn) {
+                    this.isAnimating = true;
+                    document.getElementById('roll-dice-btn').disabled = true;
+                    document.getElementById('use-power-btn').disabled = true;
+
+                    if (currentP.debuff) {
+                        const debuffInfo = currentP.debuff;
+                        await this.showNotice({
+                            icon: debuffInfo.icon,
+                            title: `Sintoma: ${debuffInfo.label}`,
+                            color: 'var(--fg-orange)',
+                            message: `${(debuffInfo.symptom || '').replace('🚨 SINTOMA: ', '')}\n\n${currentP.name} perdeu este turno para resolver o problema!`,
+                            button: 'Passar a vez'
+                        });
+                    } else {
+                        await this.showNotice({
+                            icon: '🚫', title: 'Turno Perdido!', color: 'var(--fg-pink)',
+                            message: `${currentP.name} está cumprindo penalidade e perdeu este turno!`,
+                            button: 'Passar a vez'
+                        });
+                    }
+
+                    currentP.debuff = null;
+                    currentP.skipNextTurn = false;
+                    this.drawBoard();
+                    await this.nextTurn();
+                    return;
+                }
+
+                this.isAnimating = true;
+                document.getElementById('roll-dice-btn').disabled = true;
+                document.getElementById('use-power-btn').disabled = true;
+
+                const diceBox = document.getElementById('dice-display');
+                diceBox.classList.add('rolling');
+
+                let rollResult = 1;
+                for (let i = 0; i < 10; i++) {
+                    rollResult = Math.floor(Math.random() * 3) + 1;
+                    diceBox.innerText = rollResult;
+                    soundFX.playDice();
+                    await this.sleep(70);
+                }
+
+                diceBox.classList.remove('rolling');
+                await this.sleep(300);
+
+                await this.movePlayerSteps(currentP, rollResult);
+                await this.resolveTileEvent(currentP);
+            }
+
+            async movePlayerSteps(player, steps) {
+                const targetTile = Math.min(player.tile + steps, TOTAL_TILES - 1);
+
+                while (player.tile < targetTile) {
+                    player.tile++;
+                    soundFX.playHop();
+                    this.drawBoard();
+                    this.renderHUD();
+                    await this.sleep(240);
+                }
+
+                while (player.tile > targetTile) {
+                    player.tile--;
+                    soundFX.playHop();
+                    this.drawBoard();
+                    this.renderHUD();
+                    await this.sleep(240);
+                }
+            }
+
+            async resolveTileEvent(player) {
+                if (player.tile >= TOTAL_TILES - 1) {
+                    this.triggerVictory(player);
+                    return;
+                }
+
+                const tileConfig = TILE_TYPES[player.tile];
+                if (!tileConfig) {
+                    await this.nextTurn();
+                    return;
+                }
+
+                switch (tileConfig.type) {
+                    case 'blue':
+                        await this.openQuestionModal();
+                        break;
+                    case 'yellow':
+                        await this.openEventModal();
+                        break;
+                    case 'red':
+                        await this.openPowerReceiveModal();
+                        break;
+                    default:
+                        await this.nextTurn();
+                        break;
+                }
+            }
+
+            async nextTurn() {
+                this.currentPlayerIdx = (this.currentPlayerIdx + 1) % this.players.length;
+                if (this.currentPlayerIdx === 0) {
+                    this.turnNumber++;
+                }
+                await this.startTurnSequence();
+            }
+
+            bindModalEvents() {
+                document.querySelectorAll('.diff-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const diff = btn.dataset.diff;
+                        this.showQuestionPrompt(diff);
+                    });
+                });
+
+                document.getElementById('question-continue-btn').addEventListener('click', async () => {
+                    document.getElementById('question-modal').classList.remove('active');
+                    await this.nextTurn();
+                });
+
+                document.getElementById('event-continue-btn').addEventListener('click', async () => {
+                    document.getElementById('event-modal').classList.remove('active');
+                    await this.nextTurn();
+                });
+
+                document.getElementById('power-rec-continue-btn').addEventListener('click', async () => {
+                    document.getElementById('power-receive-modal').classList.remove('active');
+                    await this.nextTurn();
+                });
+
+                document.getElementById('confirm-power-btn').addEventListener('click', () => this.executePowerAttack());
+                document.getElementById('cancel-power-btn').addEventListener('click', () => {
+                    document.getElementById('power-use-modal').classList.remove('active');
+                });
+            }
+
+            openQuestionModal() {
+                return new Promise(resolve => {
+                    document.getElementById('difficulty-selection-step').style.display = 'block';
+                    document.getElementById('question-active-step').style.display = 'none';
+                    document.getElementById('question-explanation').style.display = 'none';
+                    document.getElementById('question-continue-btn').style.display = 'none';
+
+                    document.getElementById('question-modal').classList.add('active');
+                });
+            }
+
+            shuffleArray(arr) {
+                const a = [...arr];
+                for (let i = a.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [a[i], a[j]] = [a[j], a[i]];
+                }
+                return a;
+            }
+
+            // BALANCED LETTER BAG: each letter (A-D) is used once per cycle, never twice in a row
+            nextCorrectPosition() {
+                if (!this.positionBag || this.positionBag.length === 0) {
+                    let bag = this.shuffleArray([0, 1, 2, 3]);
+                    if (bag[bag.length - 1] === this.lastCorrectPos) bag.reverse();
+                    this.positionBag = bag;
+                }
+                this.lastCorrectPos = this.positionBag.pop();
+                return this.lastCorrectPos;
+            }
+
+            // DRAW UNSEEN QUESTIONS & PLACE CORRECT ANSWER IN A BALANCED POSITION
+            showQuestionPrompt(difficulty) {
+                const pool = QUESTION_DATABASE[difficulty];
+                
+                // Filter out already used questions in this game session
+                let unused = pool.filter(q => !this.usedQuestions.has(q.id));
+                if (unused.length === 0) {
+                    // Reset used questions for this difficulty if all were answered!
+                    pool.forEach(q => this.usedQuestions.delete(q.id));
+                    unused = pool;
+                }
+
+                const rawQ = unused[Math.floor(Math.random() * unused.length)];
+                this.usedQuestions.add(rawQ.id);
+
+                const correctPos = this.nextCorrectPosition();
+                const options = this.shuffleArray(rawQ.w);
+                options.splice(correctPos, 0, rawQ.c);
+
+                this.activeQuestion = {
+                    prompt: rawQ.q,
+                    options: options,
+                    correct: correctPos,
+                    explanation: rawQ.e,
+                    difficulty: difficulty
+                };
+
+                document.getElementById('difficulty-selection-step').style.display = 'none';
+                document.getElementById('question-active-step').style.display = 'block';
+
+                document.getElementById('question-prompt-text').innerText = this.activeQuestion.prompt;
+
+                const optionsContainer = document.getElementById('question-options-container');
+                optionsContainer.innerHTML = '';
+
+                this.activeQuestion.options.forEach((optText, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'opt-btn';
+                    btn.innerText = `${String.fromCharCode(65 + idx)}) ${optText}`;
+                    btn.addEventListener('click', () => this.handleAnswerSelection(idx));
+                    optionsContainer.appendChild(btn);
+                });
+            }
+
+            async handleAnswerSelection(selectedIdx) {
+                const q = this.activeQuestion;
+                const isCorrect = selectedIdx === q.correct;
+                const player = this.players[this.currentPlayerIdx];
+
+                const optBtns = document.querySelectorAll('#question-options-container .opt-btn');
+                optBtns.forEach((btn, idx) => {
+                    btn.disabled = true;
+                    if (idx === q.correct) btn.classList.add('correct');
+                    if (idx === selectedIdx && !isCorrect) btn.classList.add('wrong');
+                });
+
+                const expBox = document.getElementById('question-explanation');
+                expBox.style.display = 'block';
+                expBox.innerHTML = `<strong>${isCorrect ? '✅ RESPOSTA CORRETA!' : '❌ RESPOSTA INCORRETA!'}</strong><br>${q.explanation}`;
+
+                if (isCorrect) {
+                    soundFX.playCorrect();
+                    player.stats.correct++;
+                } else {
+                    soundFX.playWrong();
+                    player.stats.wrong++;
+                }
+
+                let stepChange = 0;
+                if (q.difficulty === 'facil') stepChange = isCorrect ? 1 : -1;
+                if (q.difficulty === 'media') stepChange = isCorrect ? 2 : -2;
+                if (q.difficulty === 'dificil') stepChange = isCorrect ? 3 : -3;
+
+                await this.sleep(1000);
+                const targetTile = Math.max(0, player.tile + stepChange);
+                await this.movePlayerSteps(player, targetTile - player.tile);
+
+                document.getElementById('question-continue-btn').style.display = 'inline-block';
+            }
+
+            async openEventModal() {
+                const ev = RANDOM_EVENTS[Math.floor(Math.random() * RANDOM_EVENTS.length)];
+                const player = this.players[this.currentPlayerIdx];
+
+                document.getElementById('event-icon-disp').innerText = ev.icon;
+                document.getElementById('event-title-disp').innerText = ev.title;
+                document.getElementById('event-desc-disp').innerText = ev.desc;
+
+                document.getElementById('event-modal').classList.add('active');
+
+                if (ev.effect === 'debuff') {
+                    player.debuff = {
+                        type: ev.debuffType,
+                        label: ev.debuffLabel,
+                        icon: ev.icon,
+                        symptom: ev.desc
+                    };
+                    player.skipNextTurn = true;
+                    this.drawBoard();
+                    this.renderHUD();
+                } else if (ev.effect === 'move') {
+                    const targetTile = Math.max(0, player.tile + ev.value);
+                    await this.sleep(400);
+                    await this.movePlayerSteps(player, targetTile - player.tile);
+                }
+            }
+
+            openPowerReceiveModal() {
+                const pw = POWER_CARDS[Math.floor(Math.random() * POWER_CARDS.length)];
+                const player = this.players[this.currentPlayerIdx];
+                player.powers.push(pw);
+
+                soundFX.playPower();
+
+                document.getElementById('power-rec-icon').innerText = pw.icon;
+                document.getElementById('power-rec-name').innerText = pw.name;
+                document.getElementById('power-rec-desc').innerText = pw.desc;
+
+                document.getElementById('power-receive-modal').classList.add('active');
+            }
+
+            openPowerUseModal() {
+                const currentP = this.players[this.currentPlayerIdx];
+                if (currentP.powers.length === 0) return;
+
+                const pw = currentP.powers[0];
+                this.pendingPower = pw;
+
+                document.getElementById('power-use-title').innerText = `Usar: ${pw.name}`;
+                document.getElementById('power-use-instructions').innerText = `${pw.desc} Escolha o jogador alvo:`;
+
+                const grid = document.getElementById('power-targets-grid');
+                grid.innerHTML = '';
+                this.selectedPowerTarget = null;
+                document.getElementById('confirm-power-btn').disabled = true;
+
+                this.players.forEach(p => {
+                    if (p.id !== currentP.id) {
+                        const card = document.createElement('div');
+                        card.className = 'target-card';
+                        card.innerHTML = `
+                            <span style="font-size: 2.2rem;">${p.icon}</span>
+                            <span style="font-weight: bold; color: ${p.color}">${p.name}</span>
+                            <span style="font-size: 0.85rem; color: var(--fg-cyan)">Casa: ${p.tile}</span>
+                        `;
+                        card.addEventListener('click', () => {
+                            document.querySelectorAll('.target-card').forEach(c => c.classList.remove('selected'));
+                            card.classList.add('selected');
+                            this.selectedPowerTarget = p;
+                            document.getElementById('confirm-power-btn').disabled = false;
+                        });
+                        grid.appendChild(card);
+                    }
+                });
+
+                document.getElementById('power-use-modal').classList.add('active');
+            }
+
+            async executePowerAttack() {
+                const currentP = this.players[this.currentPlayerIdx];
+                const targetP = this.selectedPowerTarget;
+                const pw = this.pendingPower;
+
+                if (!targetP || !pw) return;
+
+                document.getElementById('power-use-modal').classList.remove('active');
+                currentP.powers.shift();
+
+                soundFX.playPower();
+
+                if (pw.id === 'radar') {
+                    targetP.skipNextTurn = true;
+                    this.renderHUD();
+                    await this.showNotice({
+                        icon: '📸', title: 'Multa de Radar!', color: 'var(--fg-pink)',
+                        message: `${targetP.name} foi multado por ${currentP.name} e perderá o próximo turno!`
+                    });
+                } else if (pw.id === 'vacuo') {
+                    const tempTile = currentP.tile;
+                    currentP.tile = targetP.tile;
+                    targetP.tile = tempTile;
+                    this.drawBoard();
+                    this.renderHUD();
+                    await this.showNotice({
+                        icon: '🏎️', title: 'Vácuo Aerodinâmico!', color: 'var(--fg-cyan)',
+                        message: `${currentP.name} pegou o vácuo e trocou de casa com ${targetP.name}!`
+                    });
+                } else if (pw.id === 'freio') {
+                    const targetTile = Math.max(0, targetP.tile - 2);
+                    await this.showNotice({
+                        icon: '🛑', title: 'Freio Brusco!', color: 'var(--fg-orange)',
+                        message: `${currentP.name} forçou ${targetP.name} a frear bruscamente e recuar 2 casas!`
+                    });
+                    await this.movePlayerSteps(targetP, targetTile - targetP.tile);
+                }
+
+                this.drawBoard();
+                this.renderHUD();
+            }
+
+            triggerVictory(winner) {
+                clearInterval(this.timerInterval);
+                soundFX.playCorrect();
+
+                document.getElementById('winner-announcement').innerText = `👑 ${winner.name} Venceu!`;
+                document.getElementById('winner-announcement').style.color = winner.color;
+
+                const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
+                const mins = String(Math.floor(elapsed / 60)).padStart(2, '0');
+                const secs = String(elapsed % 60).padStart(2, '0');
+                document.getElementById('final-time-disp').innerText = `${mins}:${secs}`;
+                document.getElementById('final-turns-disp').innerText = this.turnNumber;
+
+                const sorted = [...this.players].sort((a, b) => b.tile - a.tile);
+                const podiumContainer = document.getElementById('podium-display');
+                podiumContainer.innerHTML = '';
+
+                const order = [1, 0, 2];
+                order.forEach(rankIdx => {
+                    if (sorted[rankIdx]) {
+                        const p = sorted[rankIdx];
+                        const div = document.createElement('div');
+                        div.className = `podium-place podium-${rankIdx + 1}`;
+                        div.innerHTML = `
+                            <div class="podium-avatar">${p.icon}</div>
+                            <div style="font-weight: bold; font-size: 0.95rem; margin-bottom: 4px; color: ${p.color};">${p.name}</div>
+                            <div class="podium-bar">${rankIdx + 1}º</div>
+                        `;
+                        podiumContainer.appendChild(div);
+                    }
+                });
+
+                document.getElementById('victory-modal').classList.add('active');
+                this.startConfetti();
+            }
+
+            startConfetti() {
+                const canvas = document.getElementById('confetti-canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+
+                const particles = Array.from({ length: 140 }, () => ({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    color: ['#ff007f', '#00f0ff', '#ffea00', '#39ff14', '#ff5500'][Math.floor(Math.random() * 5)],
+                    size: Math.random() * 10 + 6,
+                    speedY: Math.random() * 3 + 3,
+                    speedX: Math.random() * 2 - 1
+                }));
+
+                function render() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    particles.forEach(p => {
+                        ctx.fillStyle = p.color;
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, p.size / 2, 0, Math.PI * 2);
+                        ctx.fill();
+                        p.y += p.speedY;
+                        p.x += p.speedX;
+                        if (p.y > canvas.height) p.y = -10;
+                    });
+                    requestAnimationFrame(render);
+                }
+                render();
+            }
+
+            initCanvas() {
+                this.canvas = document.getElementById('board-canvas');
+                this.ctx = this.canvas.getContext('2d');
+
+                this.tileCoords = [];
+                const rows = 4;
+                const cols = 9;
+                const paddingX = 85;
+                const paddingY = 85;
+                const cellW = (this.canvas.width - paddingX * 2) / (cols - 1);
+                const cellH = (this.canvas.height - paddingY * 2) / (rows - 1);
+
+                let tileIdx = 0;
+                for (let r = 0; r < rows; r++) {
+                    const isEven = (r % 2 === 0);
+                    for (let c = 0; c < cols; c++) {
+                        const colIdx = isEven ? c : (cols - 1 - c);
+                        const x = paddingX + colIdx * cellW;
+                        const y = paddingY + r * cellH;
+                        this.tileCoords[tileIdx] = { x, y };
+                        tileIdx++;
+                    }
+                }
+            }
+
+            drawBoard() {
+                const ctx = this.ctx;
+                const w = this.canvas.width;
+                const h = this.canvas.height;
+
+                const bgGrad = ctx.createLinearGradient(0, 0, w, h);
+                bgGrad.addColorStop(0, '#2a0845');
+                bgGrad.addColorStop(1, '#6441a5');
+                ctx.fillStyle = bgGrad;
+                ctx.fillRect(0, 0, w, h);
+
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.06)';
+                for (let i = 0; i < 20; i++) {
+                    ctx.beginPath();
+                    ctx.arc((i * 70) % w, (i * 90) % h, 18, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                // Chunky Track
+                ctx.beginPath();
+                ctx.strokeStyle = '#11031c';
+                ctx.lineWidth = 58;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+
+                for (let i = 0; i < TOTAL_TILES; i++) {
+                    const pt = this.tileCoords[i];
+                    if (i === 0) ctx.moveTo(pt.x, pt.y);
+                    else ctx.lineTo(pt.x, pt.y);
+                }
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.strokeStyle = '#ff007f';
+                ctx.lineWidth = 42;
+                for (let i = 0; i < TOTAL_TILES; i++) {
+                    const pt = this.tileCoords[i];
+                    if (i === 0) ctx.moveTo(pt.x, pt.y);
+                    else ctx.lineTo(pt.x, pt.y);
+                }
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.strokeStyle = '#ffea00';
+                ctx.lineWidth = 4;
+                ctx.setLineDash([16, 16]);
+                for (let i = 0; i < TOTAL_TILES; i++) {
+                    const pt = this.tileCoords[i];
+                    if (i === 0) ctx.moveTo(pt.x, pt.y);
+                    else ctx.lineTo(pt.x, pt.y);
+                }
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // DRAW TILES
+                for (let i = 0; i < TOTAL_TILES; i++) {
+                    const pt = this.tileCoords[i];
+                    const tileConfig = TILE_TYPES[i] || { type: 'blue' };
+
+                    ctx.beginPath();
+                    ctx.arc(pt.x, pt.y + 4, 23, 0, Math.PI * 2);
+                    ctx.fillStyle = '#000000';
+                    ctx.fill();
+
+                    ctx.beginPath();
+                    ctx.arc(pt.x, pt.y, 23, 0, Math.PI * 2);
+
+                    let fillColor = '#00f0ff';
+                    let borderColor = '#000000';
+
+                    if (tileConfig.type === 'blue') { fillColor = '#00f0ff'; }
+                    else if (tileConfig.type === 'yellow') { fillColor = '#ffea00'; }
+                    else if (tileConfig.type === 'red') { fillColor = '#ff007f'; }
+                    else if (tileConfig.type === 'start') { fillColor = '#39ff14'; }
+                    else if (tileConfig.type === 'finish') { fillColor = '#ff5500'; }
+
+                    ctx.fillStyle = fillColor;
+                    ctx.fill();
+                    ctx.lineWidth = 3;
+                    ctx.strokeStyle = borderColor;
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#000000';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+
+                    if (tileConfig.type === 'start') {
+                        ctx.font = 'bold 9px "Luckiest Guy", cursive';
+                        ctx.fillText('LARGADA', pt.x, pt.y);
+                    } else if (tileConfig.type === 'finish') {
+                        ctx.font = 'bold 9px "Luckiest Guy", cursive';
+                        ctx.fillText('ESCOLA', pt.x, pt.y);
+                    } else {
+                        ctx.font = 'bold 12px "Luckiest Guy", cursive';
+                        let iconSymbol = i.toString();
+                        if (tileConfig.type === 'blue') iconSymbol = '❓';
+                        else if (tileConfig.type === 'yellow') iconSymbol = '🎲';
+                        else if (tileConfig.type === 'red') iconSymbol = '⚡';
+                        ctx.fillText(iconSymbol, pt.x, pt.y);
+                    }
+                }
+
+                // DRAW BOUNCY PLAYER TOKENS & VISUAL DEBUFFS
+                const tileOccupants = {};
+                this.players.forEach(p => {
+                    if (!tileOccupants[p.tile]) tileOccupants[p.tile] = [];
+                    tileOccupants[p.tile].push(p);
+                });
+
+                Object.keys(tileOccupants).forEach(tileIdx => {
+                    const occ = tileOccupants[tileIdx];
+                    const pt = this.tileCoords[tileIdx];
+
+                    occ.forEach((p, offsetIdx) => {
+                        const offsetX = (offsetIdx - (occ.length - 1) / 2) * 24;
+                        const offsetY = -22;
+
+                        ctx.shadowColor = p.color;
+                        ctx.shadowBlur = 12;
+
+                        ctx.font = '26px serif';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(p.icon, pt.x + offsetX, pt.y + offsetY);
+
+                        if (p.debuff) {
+                            ctx.font = '16px serif';
+                            ctx.fillText(p.debuff.icon, pt.x + offsetX + 12, pt.y + offsetY - 10);
+                        }
+
+                        ctx.shadowBlur = 0;
+                    });
+                });
+            }
+
+            sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            window.game = new GameEngine();
+        });
+    </script>
+</body>
+</html>
